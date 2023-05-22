@@ -2,6 +2,8 @@ use axum::{response::IntoResponse, routing::get};
 
 use self::state::AppState;
 
+pub mod endpoint;
+pub mod helper;
 pub mod serve;
 pub mod state;
 pub async fn api_router() -> axum::Router {
@@ -11,6 +13,7 @@ pub async fn api_router() -> axum::Router {
 
 fn user_router() -> axum::Router<AppState> {
     axum::Router::new()
+        .nest("/api", endpoint::user_info_router())
         .route("/user", get(|| async move { "hello" }))
         .route("/count", get(count_handler))
 }

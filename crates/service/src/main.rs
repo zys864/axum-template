@@ -1,7 +1,12 @@
 use std::{future::Future, sync::atomic::AtomicUsize};
 
+pub mod core;
+pub mod error;
 pub mod http;
+pub mod model;
 pub mod utils;
+
+pub type DbPool = sqlx::PgPool;
 fn main() {
     dotenvy::dotenv().ok();
     let _guard = utils::tracing_utils::tracing_init();
