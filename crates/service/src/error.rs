@@ -1,4 +1,5 @@
 use axum::http::header;
+use axum::Json;
 use axum::{
     body,
     http::StatusCode,
@@ -27,23 +28,21 @@ pub enum ErrorKind {
 impl IntoResponse for ErrorKind {
     fn into_response(self) -> Response {
         match self {
-            ErrorKind::Unauthorized => Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .body(body::boxed(body::Empty::new()))
-                .unwrap(),
+            ErrorKind::Unauthorized => {
+                (StatusCode::UNAUTHORIZED, body::Empty::new()).into_response()
+            }
             ErrorKind::NoSuchUser(username) => {
                 let errors_info = vec![format!("no such user: {}", username)];
                 let errors = ErrorResponse::new(errors_info);
-                Response::builder()
-                    .status(StatusCode::BAD_REQUEST)
-                    .header(
+                (
+                    StatusCode::BAD_REQUEST,
+                    [(
                         header::CONTENT_TYPE,
                         header::HeaderValue::from_str("application/json").unwrap(),
-                    )
-                    .body(body::boxed(body::Full::from(
-                        serde_json::to_string(&errors).unwrap(),
-                    )))
-                    .unwrap()
+                    )],
+                    Json(errors),
+                )
+                    .into_response()
             }
             ErrorKind::TokenError(e) => {
                 let errors_info = match e.kind() {
@@ -53,59 +52,55 @@ impl IntoResponse for ErrorKind {
                 }
                 .to_string();
                 let errors = ErrorResponse::new(vec![errors_info]);
-                Response::builder()
-                    .status(StatusCode::UNPROCESSABLE_ENTITY)
-                    .header(
+                (
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    [(
                         header::CONTENT_TYPE,
                         header::HeaderValue::from_str("application/json").unwrap(),
-                    )
-                    .body(body::boxed(body::Full::from(
-                        serde_json::to_string(&errors).unwrap(),
-                    )))
-                    .unwrap()
+                    )],
+                    Json(errors),
+                )
+                    .into_response()
             }
             ErrorKind::DuplicatedEmail(s) => {
                 let errors_info = vec![format!("Duplicated email: {}", s)];
                 let errors = ErrorResponse::new(errors_info);
-                Response::builder()
-                    .status(StatusCode::UNPROCESSABLE_ENTITY)
-                    .header(
+                (
+                    StatusCode::BAD_REQUEST,
+                    [(
                         header::CONTENT_TYPE,
                         header::HeaderValue::from_str("application/json").unwrap(),
-                    )
-                    .body(body::boxed(body::Full::from(
-                        serde_json::to_string(&errors).unwrap(),
-                    )))
-                    .unwrap()
+                    )],
+                    Json(errors),
+                )
+                    .into_response()
             }
             ErrorKind::FiledValidate(e) => {
                 let errors_info: Vec<String> =
                     e.to_string().split('\n').map(|x| x.to_string()).collect();
                 let errors = ErrorResponse::new(errors_info);
-                Response::builder()
-                    .status(StatusCode::UNPROCESSABLE_ENTITY)
-                    .header(
+                (
+                    StatusCode::BAD_REQUEST,
+                    [(
                         header::CONTENT_TYPE,
                         header::HeaderValue::from_str("application/json").unwrap(),
-                    )
-                    .body(body::boxed(body::Full::from(
-                        serde_json::to_string(&errors).unwrap(),
-                    )))
-                    .unwrap()
+                    )],
+                    Json(errors),
+                )
+                    .into_response()
             }
             ErrorKind::SqlError(_) | ErrorKind::EncripyError(_) => {
                 let errors_info = vec!["Internel server error".to_string()];
                 let errors = ErrorResponse::new(errors_info);
-                Response::builder()
-                    .status(StatusCode::UNPROCESSABLE_ENTITY)
-                    .header(
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    [(
                         header::CONTENT_TYPE,
                         header::HeaderValue::from_str("application/json").unwrap(),
-                    )
-                    .body(body::boxed(body::Full::from(
-                        serde_json::to_string(&errors).unwrap(),
-                    )))
-                    .unwrap()
+                    )],
+                    Json(errors),
+                )
+                    .into_response()
             }
         }
     }
