@@ -7,5 +7,5 @@ use super::state::AppState;
 pub mod user_info;
 
 pub fn user_info_router() -> Router<AppState> {
-    Router::new().route("/user", get(UserInfoService::user_info))
+    Router::new().route("/user", get(UserInfoService::login))
 }
