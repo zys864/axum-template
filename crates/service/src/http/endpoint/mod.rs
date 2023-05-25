@@ -1,7 +1,4 @@
-use axum::{
-    routing::{post},
-    Router,
-};
+use axum::{routing::post, Router};
 
 use self::user_info::UserInfoService;
 
@@ -13,7 +10,9 @@ pub fn user_info_router() -> Router<AppState> {
     Router::new()
         .route(
             "/user",
-            post(UserInfoService::login).get(UserInfoService::get_current_user),
+            post(UserInfoService::login)
+                .get(UserInfoService::get_current_user)
+                .put(UserInfoService::update_user_info),
         )
         .route("/users", post(UserInfoService::user_registration))
 }

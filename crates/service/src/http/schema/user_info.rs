@@ -42,6 +42,24 @@ pub struct UserInfoForUpdate {
     pub bio: Option<String>,
 }
 
+impl UserInfoRspModel {
+    pub fn new(
+        email: String,
+        username: String,
+        bio: Option<String>,
+        image: Option<String>,
+    ) -> Result<Self, jsonwebtoken::errors::Error> {
+        let token = jwt::Claims::new(email.clone()).generate_jwt_token()?;
+
+        Ok(Self {
+            email,
+            token,
+            username,
+            bio,
+            image,
+        })
+    }
+}
 impl TryFrom<UserInfoDbModel> for UserInfoRspModel {
     type Error = jsonwebtoken::errors::Error;
 

@@ -43,7 +43,7 @@ where
     S: Send + Sync,
 {
     type Rejection = ErrorKind;
-
+    
     async fn from_request_parts(
         parts: &mut axum::http::request::Parts,
         state: &S,
@@ -52,8 +52,9 @@ where
         let TypedHeader(Authorization(bearer)) =
             TypedHeader::<Authorization<Bearer>>::from_request_parts(parts, state)
                 .await
-                .map_err(|_| {
-                    jsonwebtoken::errors::Error::from(jsonwebtoken::errors::ErrorKind::InvalidToken)
+                .map_err(|err| {
+                    tracing::error!(?err);
+                    ErrorKind::Unauthorized
                 })?;
         // Decode the user data
         let token_data = Claims::decode(bearer.token())?;

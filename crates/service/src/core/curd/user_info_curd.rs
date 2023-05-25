@@ -1,4 +1,8 @@
-use crate::{model::user_info::UserInfoDbModel, DbPool};
+use crate::{
+    http::{helper::auth::AuthUtils, schema::user_info::UserInfoRspModel},
+    model::user_info::{UserInfoDbModel, UserInfoDbUpdateModel},
+    DbPool,
+};
 
 pub struct UserInfoCurd;
 
@@ -50,23 +54,44 @@ impl UserInfoCurd {
         .await?;
         Ok(user)
     }
-    pub async fn update_user(db: &DbPool, user: &UserInfoDbModel) -> sqlx::Result<i64> {
+    pub async fn update_user(
+        db: &DbPool,
+        email:&str,
+        user_for_update: &UserInfoDbUpdateModel,
+    ) -> crate::error::HttpResult<UserInfoRspModel> {
+    
+        let hased_passwd = if let Some(passwd) = user_for_update.password.as_ref() {
+            Some(AuthUtils::hash(&passwd)?)
+        } else {
+            None
+        };
         let updated_user = sqlx::query!(
             r#"
-            UPDATE  user_info SET email = $2, username=$3, hashed_password=$4, bio=$5, image=$6
-            WHERE user_id = $1
-            RETURNING user_id
+            UPDATE "user_info" 
+                SET email = COALESCE ( $1, user_info.email ),
+                username = COALESCE ( $2, user_info.username ),
+                hashed_password = COALESCE ( $3, user_info.hashed_password ),
+                bio = COALESCE ( $4, user_info.bio ),
+                image = COALESCE ( $5, user_info.image ) 
+            WHERE
+                email =$6
+            RETURNING email, username, bio, image
             "#,
-            user.user_id,
-            user.email,
-            user.username,
-            user.hashed_password,
-            user.bio,
-            user.image
+            user_for_update.email,
+            user_for_update.username,
+            hased_passwd,
+            user_for_update.bio,
+            user_for_update.image,
+            email
         )
         .fetch_one(db)
         .await?;
-        Ok(updated_user.user_id)
+        Ok(UserInfoRspModel::new(
+            updated_user.email,
+            updated_user.username,
+            updated_user.bio,
+            updated_user.image,
+        )?)
     }
 }
 

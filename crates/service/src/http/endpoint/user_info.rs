@@ -11,6 +11,7 @@ use crate::{
         },
         state::AppState,
     },
+    model::user_info::UserInfoDbUpdateModel,
 };
 
 pub struct UserInfoService;
@@ -19,7 +20,7 @@ impl UserInfoService {
     /// # Authentication
     ///
     /// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#authentication
-    #[instrument(skip_all,err(Debug))]
+    #[instrument(skip_all, err(Debug))]
     pub async fn login(
         State(state): State<AppState>,
         Json(Taggeduser { user }): Json<Taggeduser<UserInfoForLogin>>,
@@ -39,7 +40,7 @@ impl UserInfoService {
 
     /// # Registration
     /// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints/#registration
-    #[instrument(skip_all,err(Debug))]
+    #[instrument(skip_all, err(Debug))]
     pub async fn user_registration(
         State(state): State<AppState>,
         Json(Taggeduser { user }): Json<Taggeduser<UserInfoForRegistration>>,
@@ -69,10 +70,10 @@ impl UserInfoService {
 
     /// # Get Current User
     /// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints/#get-current-user
-    #[instrument(skip_all,err(Debug))]
+    #[instrument(skip_all, err(Debug))]
     pub async fn get_current_user(
         claims: Claims,
-        State(state): State<AppState>,
+        state: State<AppState>,
     ) -> HttpResult<Json<Taggeduser<UserInfoRspModel>>> {
         let user = UserInfoCurd::get_by_email(&state.db_session, &claims.email)
             .await?
@@ -81,5 +82,25 @@ impl UserInfoService {
         Ok(Json(Taggeduser {
             user: user_info_rsp_model,
         }))
+    }
+
+    /// # Get Current User
+    /// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints/#get-current-user
+    #[instrument(skip_all, err(Debug))]
+    pub async fn update_user_info(
+        claims: Claims,
+        state: State<AppState>,
+        Json(Taggeduser { user }): Json<Taggeduser<UserInfoDbUpdateModel>>,
+    ) -> HttpResult<Json<Taggeduser<UserInfoRspModel>>> {
+        if user == UserInfoDbUpdateModel::default() {
+            return Self::get_current_user(claims, state).await;
+        }
+        if user.email.is_some()
+            && UserInfoCurd::is_duplicate_email(&state.db_session, &claims.email).await?
+        {
+            return Err(crate::error::ErrorKind::DuplicatedEmail(claims.email));
+        }
+        let user = UserInfoCurd::update_user(&state.db_session, &claims.email, &user).await?;
+        Ok(Json(Taggeduser { user }))
     }
 }
