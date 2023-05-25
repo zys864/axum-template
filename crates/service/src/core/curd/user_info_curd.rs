@@ -21,6 +21,22 @@ impl UserInfoCurd {
             .unwrap_or(false);
         Ok(is_duplicate)
     }
+    pub async fn create(
+        db: &DbPool,
+        username: &str,
+        email: &str,
+        hashed_password: &str,
+    ) -> sqlx::Result<()> {
+        let _res = sqlx::query!(
+            "INSERT INTO user_info (username,email,hashed_password) VALUES ($1,$2,$3)",
+            username,
+            email,
+            hashed_password,
+        )
+        .execute(db)
+        .await?;
+        Ok(())
+    }
     pub async fn get_by_username(
         db: &DbPool,
         username: &str,

@@ -7,13 +7,13 @@ use axum::{
 };
 use serde::Serialize;
 use thiserror::Error;
-
+pub type HttpResult<T> = std::result::Result<T, ErrorKind>;
 #[derive(Debug, Error)]
 pub enum ErrorKind {
     #[error("not be authorized")]
     Unauthorized,
-    #[error("no such user: {}", 0)]
-    NoSuchUser(String),
+    #[error("no such user or error password")]
+    NoSuchUserOrErrorPassword,
     #[error(transparent)]
     TokenError(#[from] jsonwebtoken::errors::Error),
     #[error("Duplicated email: {}", 0)]
@@ -27,12 +27,13 @@ pub enum ErrorKind {
 }
 impl IntoResponse for ErrorKind {
     fn into_response(self) -> Response {
+
         match self {
             ErrorKind::Unauthorized => {
                 (StatusCode::UNAUTHORIZED, body::Empty::new()).into_response()
             }
-            ErrorKind::NoSuchUser(username) => {
-                let errors_info = vec![format!("no such user: {}", username)];
+            ErrorKind::NoSuchUserOrErrorPassword => {
+                let errors_info = vec![ErrorKind::NoSuchUserOrErrorPassword.to_string()];
                 let errors = ErrorResponse::new(errors_info);
                 (
                     StatusCode::BAD_REQUEST,

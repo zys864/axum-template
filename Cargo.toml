@@ -3,7 +3,6 @@ members = [
     "crates/service",
     "crates/macros/tracing_test",
     "crates/macros/tracing_test_macro",
-    "crates/macros/serde_tag",
 ]
 
 

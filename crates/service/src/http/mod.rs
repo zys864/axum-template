@@ -4,9 +4,9 @@ use self::state::AppState;
 
 pub mod endpoint;
 pub mod helper;
+pub mod schema;
 pub mod serve;
 pub mod state;
-pub mod schema;
 pub async fn api_router() -> axum::Router {
     let state = AppState::new().await;
     axum::Router::new().merge(user_router()).with_state(state)
