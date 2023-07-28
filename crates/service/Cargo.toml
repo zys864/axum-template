@@ -24,7 +24,7 @@ sqlx = { version = "0.6.3", features = [
 thiserror = "1.0.40"
 tokio = { version = "1.28.1", features = ["full"] }
 tower = { version = "0.4.13", features = ["full"] }
-tower-http = { version = "0.4.0", features = ["full"] }
+tower-http = { version = "0.4.3", features = ["full"] }
 tracing = "0.1.37"
 common_utils = { path = "../common_utils" }
 tracing_test = { path = "../macros/tracing_test" }

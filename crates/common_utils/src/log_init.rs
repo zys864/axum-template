@@ -21,6 +21,7 @@ pub fn log_init<T: AsRef<Path>>(log_dir: impl Into<Option<T>>) -> Option<WorkerG
     let console_layer = fmt::Layer::new()
         .with_writer(std::io::stdout)
         .with_timer(local_time.clone())
+        .with_thread_names(true)
         .pretty();
 
     let registry = tracing_subscriber::registry()
@@ -37,7 +38,8 @@ pub fn log_init<T: AsRef<Path>>(log_dir: impl Into<Option<T>>) -> Option<WorkerG
         let file_layer = fmt::layer()
             .with_ansi(false)
             .with_timer(local_time)
-            .with_writer(non_blocking_appender);
+            .with_writer(non_blocking_appender)
+            .with_thread_names(true);
         registry.with(file_layer).init();
     }
 
