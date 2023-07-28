@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "crates/service",
+    "crates/utils",
     "crates/macros/tracing_test",
     "crates/macros/tracing_test_macro",
 ]
@@ -8,7 +9,7 @@ members = [
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
-serde = { version = "1.0.163", features = ["derive"] }
-serde_json = { version = "1.0.96" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
 tracing = "0.1.29"
 chrono = { version = "0.4.24", features = ["serde"] }

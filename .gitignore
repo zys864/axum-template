@@ -3,3 +3,7 @@ logs
 
 /target
 Cargo.lock
+
+#ide
+.idea
+*.iml
