@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "crates/service",
-    "crates/utils",
+    "crates/common_utils",
     "crates/macros/tracing_test",
     "crates/macros/tracing_test_macro",
 ]

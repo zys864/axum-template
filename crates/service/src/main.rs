@@ -9,7 +9,7 @@ pub mod utils;
 pub type DbPool = sqlx::PgPool;
 fn main() {
     dotenvy::dotenv().ok();
-    let _guard = utils::tracing_utils::tracing_init();
+    let _guard = common_utils::log_init::log_init("logs");
     tracing::info!("starting ...");
     let ip_addr = "0.0.0.0:3000".parse().unwrap();
     block_on(http::serve::serve(ip_addr))

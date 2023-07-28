@@ -1,0 +1,20 @@
+{
+    "sqltools.useNodeRuntime": true,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "todo",
+            "database": "${workspaceFolder:axum-template}/crates/service/todos.db"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "pg",
+            "database": "postgres",
+            "username": "postgres"
+        }
+    ]
+}
