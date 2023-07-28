@@ -1,6 +1,7 @@
 use std::path::Path;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{
     fmt::{self, time::OffsetTime},
     EnvFilter,
@@ -37,7 +38,7 @@ pub fn log_init<T: AsRef<Path>>(log_dir: impl Into<Option<T>>) -> Option<WorkerG
             .with_ansi(false)
             .with_timer(local_time)
             .with_writer(non_blocking_appender);
-        registry.with(file_layer);
+        registry.with(file_layer).init();
     }
 
     workguard
